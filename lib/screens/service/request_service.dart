@@ -19,7 +19,12 @@ class _RequestServiceScreenState extends State<RequestServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Request Service')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Request Service')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

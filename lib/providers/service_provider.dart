@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:mechanic_discovery_app/models/service_request_model.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';

@@ -1,4 +1,6 @@
 // lib/screens/map_screen.dart
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +14,6 @@ import '../providers/auth_provider.dart';
 import '../providers/location_provider.dart';
 import '../services/api_endpoints.dart';
 
-// lib/screens/map_screen.dart (add above MapScreen class)
 class RequestInfoCard extends StatelessWidget {
   final ServiceRequest request;
   final VoidCallback onAccept;
@@ -35,7 +36,6 @@ class RequestInfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             spreadRadius: 2,
@@ -95,8 +95,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _isLoading = true;
   bool _showRequestsList = false;
   List<ServiceRequest> _nearbyRequests = [];
-  
-
+  bool get isMechanic => context.watch<AuthProvider>().isMechanic;
 
   @override
   void initState() {
@@ -163,33 +162,47 @@ class _MapScreenState extends State<MapScreen> {
   void _updateMarkers() {
     _markers.clear();
 
-    // Add current location marker
     if (_currentPosition != null) {
       _markers.add(
         Marker(
-          width: 40,
-          height: 40,
           point: latlng.LatLng(
             _currentPosition!.latitude,
             _currentPosition!.longitude,
           ),
-          builder: (ctx) =>
-              const Icon(Icons.location_pin, color: Colors.blue, size: 40),
+          builder: (ctx) => Icon(
+            Icons.location_pin,
+            color: isMechanic ? Colors.blue : Colors.green,
+            size: 40,
+          ),
         ),
       );
     }
 
-    // Add request markers
-    for (final request in _nearbyRequests) {
+    if (isMechanic) {
+      for (final request in _nearbyRequests) {
+        _markers.add(
+          Marker(
+            point: latlng.LatLng(request.latitude, request.longitude),
+            builder: (ctx) => GestureDetector(
+              onTap: () => _onMarkerTapped(request),
+              child: const Icon(
+                Icons.location_pin,
+                color: Colors.red,
+                size: 40,
+              ),
+            ),
+          ),
+        );
+      }
+    } else if (_currentPosition != null) {
       _markers.add(
         Marker(
-          width: 40,
-          height: 40,
-          point: latlng.LatLng(request.latitude, request.longitude),
-          builder: (ctx) => GestureDetector(
-            onTap: () => _onMarkerTapped(request),
-            child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+          point: latlng.LatLng(
+            _currentPosition!.latitude + 0.01,
+            _currentPosition!.longitude + 0.01,
           ),
+          builder: (ctx) =>
+              const Icon(Icons.person_pin, color: Colors.orange, size: 40),
         ),
       );
     }
@@ -201,7 +214,6 @@ class _MapScreenState extends State<MapScreen> {
       _showRequestsList = false;
     });
 
-    // Move camera to selected request
     _mapController.move(
       latlng.LatLng(request.latitude, request.longitude),
       14.0,
@@ -229,7 +241,6 @@ class _MapScreenState extends State<MapScreen> {
           const SnackBar(content: Text('Request accepted successfully!')),
         );
 
-        // Remove accepted request from list
         setState(() {
           _nearbyRequests.removeWhere((req) => req.id == requestId);
           _selectedRequest = null;
@@ -247,12 +258,39 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _centerMap() {
+    if (_currentPosition != null) {
+      _mapController.move(
+        latlng.LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+        14.0,
+      );
+    }
+  }
+
+  Widget _buildMechanicFAB() {
+    return FloatingActionButton(
+      heroTag: 'location',
+      backgroundColor: Colors.white,
+      onPressed: _centerMap,
+      child: const Icon(Icons.my_location, color: Colors.black),
+    );
+  }
+
+  Widget _buildOwnerFAB() {
+    return FloatingActionButton.extended(
+      heroTag: 'request_service',
+      backgroundColor: Colors.blue,
+      icon: const Icon(Icons.car_repair),
+      label: const Text('Request Service'),
+      onPressed: () => Navigator.pushNamed(context, '/request-service'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Map View
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -261,25 +299,20 @@ class _MapScreenState extends State<MapScreen> {
                       _currentPosition!.latitude,
                       _currentPosition!.longitude,
                     )
-                  :  latlng.LatLng(-1.2921, 36.8219), // Fallback to Nairobi coordinates
+                  : latlng.LatLng(-1.2921, 36.8219),
               zoom: 14.0,
             ),
             children: [
-              // OpenStreetMap Tile Layer
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.app',
               ),
-
-              // Markers Layer
               MarkerLayer(markers: _markers),
             ],
           ),
 
-          // Loading Indicator
           if (_isLoading) const Center(child: CircularProgressIndicator()),
 
-          // Top App Bar
           Positioned(
             top: MediaQuery.of(context).padding.top,
             left: 0,
@@ -289,14 +322,25 @@ class _MapScreenState extends State<MapScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
                   children: [
+                    // Back button
+                    FloatingActionButton(
+                      heroTag: 'back',
+                      mini: true,
+                      backgroundColor: Colors.white,
+                      onPressed: () => Navigator.pop(context),
+                      child: const Icon(Icons.arrow_back, color: Colors.black),
+                    ),
+                    const SizedBox(width: 10),
+                    // Refresh button
                     FloatingActionButton(
                       heroTag: 'refresh',
                       mini: true,
                       backgroundColor: Colors.white,
-                      onPressed: () => _getCurrentLocation(),
+                      onPressed: _getCurrentLocation,
                       child: const Icon(Icons.refresh, color: Colors.black),
                     ),
                     const SizedBox(width: 10),
+                    // Search bar
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -305,7 +349,6 @@ class _MapScreenState extends State<MapScreen> {
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
-                              // ignore: deprecated_member_use
                               color: Colors.black.withOpacity(0.1),
                               blurRadius: 10,
                               spreadRadius: 1,
@@ -322,9 +365,7 @@ class _MapScreenState extends State<MapScreen> {
                                   hintText: 'Search nearby requests...',
                                   border: InputBorder.none,
                                 ),
-                                onChanged: (value) {
-                                  // Implement search functionality
-                                },
+                                onChanged: (value) {},
                               ),
                             ),
                           ],
@@ -332,6 +373,7 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
+                    // List toggle button
                     FloatingActionButton(
                       heroTag: 'list',
                       mini: true,
@@ -350,7 +392,6 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // Request Details Card
           if (_selectedRequest != null)
             Positioned(
               bottom: 0,
@@ -363,7 +404,6 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
 
-          // Nearby Requests List
           if (_showRequestsList)
             Positioned(
               top: MediaQuery.of(context).padding.top + 80,
@@ -376,7 +416,6 @@ class _MapScreenState extends State<MapScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      // ignore: deprecated_member_use
                       color: Colors.black.withOpacity(0.2),
                       blurRadius: 10,
                       spreadRadius: 2,
@@ -443,25 +482,8 @@ class _MapScreenState extends State<MapScreen> {
             ),
         ],
       ),
-
-      // Location Button
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'location',
-        backgroundColor: Colors.white,
-        onPressed: () {
-          if (_currentPosition != null) {
-            _mapController.move(
-              latlng.LatLng(
-                _currentPosition!.latitude,
-                _currentPosition!.longitude,
-              ),
-              14.0,
-            );
-          }
-        },
-        child: const Icon(Icons.my_location, color: Colors.black),
-      ),
+      floatingActionButton: isMechanic ? _buildMechanicFAB() : _buildOwnerFAB(),
     );
   }
 }

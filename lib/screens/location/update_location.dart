@@ -15,7 +15,12 @@ class _UpdateLocationScreenState extends State<UpdateLocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Location')),
+      appBar: AppBar(
+      leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      title: const Text('Update Location')),
       body: Center(
         child: _isLoading
             ? const CircularProgressIndicator()

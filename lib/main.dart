@@ -1,7 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mechanic_discovery_app/screens/map_screen.dart';
+import 'package:mechanic_discovery_app/screens/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
@@ -21,6 +24,8 @@ import 'package:mechanic_discovery_app/services/api_service.dart';
 import 'package:mechanic_discovery_app/services/auth_service.dart';
 import 'package:mechanic_discovery_app/services/location_service.dart';
 import 'package:mechanic_discovery_app/services/storage_service.dart';
+
+import 'theme/app_theme.dart'; // ← import your theme here
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,10 +92,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Mechanic Discovery',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
+        theme: AppTheme.lightTheme, // ← applied light theme here
         initialRoute: '/login',
         routes: {
           '/login': (context) => const LoginScreen(),
@@ -101,10 +103,8 @@ class MyApp extends StatelessWidget {
                 ? const MechanicHomeScreen()
                 : const OwnerHomeScreen();
           },
-
-            // ADD THIS ROUTE
-          '/map': (context) => const MapScreen(), // New route for map screen
-
+          '/profile': (context) => const ProfileScreen(),
+          '/map': (context) => const MapScreen(),
           '/update-location': (context) => const UpdateLocationScreen(),
           '/request-service': (context) => const RequestServiceScreen(),
           '/nearby-mechanics': (context) => const NearbyMechanicsScreen(),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -15,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _loginIdController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true; // Moved to state for visibility toggle
 
   @override
   Widget build(BuildContext context) {
@@ -28,25 +28,59 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               TextFormField(
                 controller: _loginIdController,
-                decoration: const InputDecoration(labelText: 'Email/Username'),
+                decoration: const InputDecoration(
+                  labelText: 'Email/Username',
+                  prefixIcon: Icon(Icons.person),
+                ),
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () => setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    }),
+                  ),
+                ),
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               _isLoading
                   ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _submitForm,
-                      child: const Text('Login'),
+                  : SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _submitForm,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () => Navigator.pushNamed(context, '/register'),
-                child: const Text('Create Account'),
+                child: const Text(
+                  "Don't have an account? Create Account",
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             ],
           ),

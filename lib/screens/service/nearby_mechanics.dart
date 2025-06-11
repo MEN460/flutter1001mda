@@ -21,11 +21,17 @@ class NearbyMechanicsScreen extends StatelessWidget {
 
     return (response as List).map((item) => UserModel.fromJson(item)).toList();
   }
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nearby Mechanics')),
+      appBar: AppBar(
+       leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ), 
+        title: const Text('Nearby Mechanics')),
       body: FutureBuilder<List<UserModel>>(
         future: _getNearbyMechanics(context),
         builder: (context, snapshot) {

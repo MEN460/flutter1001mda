@@ -28,4 +28,6 @@ class UserModel {
       currentLongitude: json['current_longitude']?.toDouble(),
     );
   }
+
+  get token => null;
 }
