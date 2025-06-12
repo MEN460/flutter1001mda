@@ -1,12 +1,19 @@
+/*
+
 import 'package:flutter/material.dart';
 import 'package:mechanic_discovery_app/models/service_request_model.dart';
 
 class ServiceRequestCard extends StatelessWidget {
   final ServiceRequest request;
   final VoidCallback? onAccept;
+  final VoidCallback? onTap;
 
-  const ServiceRequestCard({Key? key, required this.request, this.onAccept})
-    : super(key: key);
+  const ServiceRequestCard({
+    Key? key,
+    required this.request,
+    this.onAccept,
+    this.onTap,
+  }) : super(key: key);
 
   Color _getStatusColor(BuildContext context, String status) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -15,9 +22,7 @@ class ServiceRequestCard extends StatelessWidget {
         return colorScheme.secondary;
       case 'accepted':
         return colorScheme.primary;
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
+      case 'declined':
         return Colors.red;
       default:
         return Colors.grey;
@@ -31,11 +36,13 @@ class ServiceRequestCard extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       color: colorScheme.surface,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {}, // Add tap action callback here
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -48,8 +55,6 @@ class ServiceRequestCard extends StatelessWidget {
                     child: Text(
                       request.description,
                       style: textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
@@ -63,35 +68,29 @@ class ServiceRequestCard extends StatelessWidget {
                     ),
                     child: Text(
                       request.status.toUpperCase(),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onPrimary,
-                      ),
+                      style: textTheme.labelSmall?.copyWith(color: colorScheme.onPrimary),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
-                'Location: ${request.latitude.toStringAsFixed(4)}, '
-                '${request.longitude.toStringAsFixed(4)}',
+                'Location: \nLatitude ${request.latitude.toStringAsFixed(4)},\nLongitude ${request.longitude.toStringAsFixed(4)}',
                 style: textTheme.bodyMedium,
               ),
-              if (onAccept != null && request.status == 'pending')
+              if (onAccept != null && request.status.toLowerCase() == 'pending')
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: ElevatedButton(
-                      onPressed: onAccept,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                  child: ElevatedButton(
+                    onPressed: onAccept,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text('Accept Request'),
                     ),
+                    child: const Text('Accept Request'),
                   ),
                 ),
             ],
@@ -101,3 +100,6 @@ class ServiceRequestCard extends StatelessWidget {
     );
   }
 }
+
+
+*/

@@ -14,20 +14,53 @@ class _UpdateLocationScreenState extends State<UpdateLocationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-      leading: IconButton(
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-      title: const Text('Update Location')),
+        title: Text(
+          'Update Location',
+          style: textTheme.titleLarge?.copyWith(color: colorScheme.primary),
+        ),
+        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        iconTheme: theme.appBarTheme.iconTheme,
+      ),
       body: Center(
-        child: _isLoading
-            ? const CircularProgressIndicator()
-            : ElevatedButton(
-                onPressed: _updateLocation,
-                child: const Text('Get Current Location'),
-              ),
+        child: Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: _isLoading
+                ? CircularProgressIndicator(color: colorScheme.primary)
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      textStyle: textTheme.labelLarge,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _updateLocation,
+                    child: const Text('Get Current Location'),
+                  ),
+          ),
+        ),
       ),
     );
   }

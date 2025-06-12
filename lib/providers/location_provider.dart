@@ -39,7 +39,9 @@ class LocationProvider with ChangeNotifier {
         altitude: 0.0,
         heading: 0.0,
         speed: 0.0,
-        speedAccuracy: 0.0, altitudeAccuracy: 1.0, headingAccuracy: 1.0
+        speedAccuracy: 0.0,
+        altitudeAccuracy: 1.0,
+        headingAccuracy: 1.0,
       );
       notifyListeners();
     } catch (e) {
@@ -47,5 +49,15 @@ class LocationProvider with ChangeNotifier {
     }
   }
 
-  Future getCurrentPosition() async {}
+  Future<Position?> getCurrentPosition() async {
+    try {
+      final position = await _locationService.getCurrentLocation();
+      _currentPosition = position;
+      notifyListeners();
+      return position;
+    } catch (e) {
+      print('[LocationProvider] Error retrieving location: $e');
+      return null;
+    }
+  }
 }

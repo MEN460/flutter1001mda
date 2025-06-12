@@ -29,9 +29,9 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProfileHeader(user),
+            _buildProfileHeader(context, user),
             const SizedBox(height: 24),
-            _buildUserInfo(user),
+            _buildUserInfo(context, user),
             const SizedBox(height: 24),
             _buildActionsSection(context),
           ],
@@ -40,45 +40,96 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(UserModel? user) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundColor: Colors.grey[200],
-          child: const Icon(Icons.person, size: 60, color: Colors.blue),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildProfileHeader(BuildContext context, UserModel? user) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Row(
           children: [
-            Text(
-              user?.username ?? 'No Name',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: colorScheme.primary.withOpacity(0.1),
+              child: Icon(Icons.person, size: 60, color: colorScheme.primary),
             ),
-            Text(
-              user?.userType == 'mechanic' ? 'Mechanic' : 'Car Owner',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            const SizedBox(width: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user?.username ?? 'No Name',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    user?.userType == 'mechanic' ? 'Mechanic' : 'Car Owner',
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.secondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildUserInfo(UserModel? user) {
+  Widget _buildUserInfo(BuildContext context, UserModel? user) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow(Icons.email, 'Email', user?.email ?? ''),
+            _buildInfoRow(
+              Icons.email,
+              'Email',
+              user?.email ?? '',
+              colorScheme,
+              textTheme,
+            ),
             const Divider(),
-            _buildInfoRow(Icons.phone, 'Phone', user?.phone ?? 'Not provided'),
+            _buildInfoRow(
+              Icons.phone,
+              'Phone',
+              user?.phone ?? 'Not provided',
+              colorScheme,
+              textTheme,
+            ),
             if (user?.userType == 'mechanic') ...[
               const Divider(),
-              _buildInfoRow(Icons.star, 'Rating', '4.8 (120 reviews)'),
+              _buildInfoRow(
+                Icons.star,
+                'Rating',
+                '4.8 (120 reviews)',
+                colorScheme,
+                textTheme,
+              ),
             ],
           ],
         ),
@@ -86,12 +137,18 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue),
+          Icon(icon, color: colorScheme.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -99,9 +156,11 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.secondary,
+                  ),
                 ),
-                Text(value, style: const TextStyle(fontSize: 16)),
+                Text(value, style: textTheme.bodyLarge),
               ],
             ),
           ),
@@ -111,30 +170,38 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildActionsSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final isMechanic = context.watch<AuthProvider>().isMechanic;
 
-    return Column(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.location_on),
-          title: const Text('Update Location'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.pushNamed(context, '/update-location'),
-        ),
-        if (isMechanic)
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: colorScheme.surface,
+      child: Column(
+        children: [
           ListTile(
-            leading: const Icon(Icons.history),
-            title: const Text('Service History'),
-            trailing: const Icon(Icons.chevron_right),
+            leading: Icon(Icons.location_on, color: colorScheme.primary),
+            title: Text('Update Location', style: textTheme.bodyLarge),
+            trailing: Icon(Icons.chevron_right, color: colorScheme.primary),
+            onTap: () => Navigator.pushNamed(context, '/update-location'),
+          ),
+          if (isMechanic)
+            ListTile(
+              leading: Icon(Icons.history, color: colorScheme.primary),
+              title: Text('Service History', style: textTheme.bodyLarge),
+              trailing: Icon(Icons.chevron_right, color: colorScheme.primary),
+              onTap: () {},
+            ),
+          ListTile(
+            leading: Icon(Icons.settings, color: colorScheme.primary),
+            title: Text('Settings', style: textTheme.bodyLarge),
+            trailing: Icon(Icons.chevron_right, color: colorScheme.primary),
             onTap: () {},
           ),
-        ListTile(
-          leading: const Icon(Icons.settings),
-          title: const Text('Settings'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () {},
-        ),
-      ],
+        ],
+      ),
     );
   }
 

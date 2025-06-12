@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mechanic_discovery_app/screens/map_screen.dart';
 import 'package:mechanic_discovery_app/screens/profile/profile_screen.dart';
+import 'package:mechanic_discovery_app/screens/profile/mechanic_profile_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
 import 'package:mechanic_discovery_app/providers/location_provider.dart';
 import 'package:mechanic_discovery_app/providers/service_provider.dart';
+import 'package:mechanic_discovery_app/providers/mechanic_stats_provider.dart';
 
 import 'package:mechanic_discovery_app/screens/auth/login_screen.dart';
 import 'package:mechanic_discovery_app/screens/auth/register_screen.dart';
@@ -24,6 +26,8 @@ import 'package:mechanic_discovery_app/services/api_service.dart';
 import 'package:mechanic_discovery_app/services/auth_service.dart';
 import 'package:mechanic_discovery_app/services/location_service.dart';
 import 'package:mechanic_discovery_app/services/storage_service.dart';
+
+import 'package:mechanic_discovery_app/models/user_model.dart'; // Import UserModel
 
 import 'theme/app_theme.dart'; // ← import your theme here
 
@@ -43,7 +47,20 @@ Future<void> main() async {
     print("Error loading .env: $e");
   }
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => MechanicStatsProvider()),
+        ChangeNotifierProvider(
+          create: (_) => LocationProvider(LocationService()),
+        ),
+        ChangeNotifierProvider(create: (_) => ServiceProvider()),
+        // ...other providers...
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -51,66 +68,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider(create: (_) => ApiService()),
-        Provider(create: (_) => StorageService()),
-        Provider(create: (_) => LocationService()),
-
-        ProxyProvider2<ApiService, StorageService, AuthService>(
-          update: (_, apiService, storageService, __) =>
-              AuthService(apiService, storageService),
-        ),
-
-        ChangeNotifierProxyProvider<AuthService, AuthProvider>(
-          create: (_) => AuthProvider(),
-          update: (_, authService, authProvider) {
-            authProvider ??= AuthProvider();
-            authProvider.updateAuthService(authService);
-            return authProvider;
-          },
-        ),
-
-        ChangeNotifierProxyProvider<LocationService, LocationProvider>(
-          create: (_) => LocationProvider(LocationService()),
-          update: (_, locService, locProvider) => LocationProvider(locService),
-        ),
-
-        ChangeNotifierProxyProvider3<
-          AuthProvider,
-          ApiService,
-          StorageService,
-          ServiceProvider
-        >(
-          create: (_) => ServiceProvider(),
-          update: (_, auth, api, storage, provider) {
-            provider ??= ServiceProvider();
-            provider.updateDependencies(auth, api, storage);
-            return provider;
-          },
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Mechanic Discovery',
-        theme: AppTheme.lightTheme, // ← applied light theme here
-        initialRoute: '/login',
-        routes: {
-          '/login': (context) => const LoginScreen(),
-          '/register': (context) => const RegisterScreen(),
-          '/home': (context) {
-            final authProvider = context.read<AuthProvider>();
-            return authProvider.isMechanic
-                ? const MechanicHomeScreen()
-                : const OwnerHomeScreen();
-          },
-          '/profile': (context) => const ProfileScreen(),
-          '/map': (context) => const MapScreen(),
-          '/update-location': (context) => const UpdateLocationScreen(),
-          '/request-service': (context) => const RequestServiceScreen(),
-          '/nearby-mechanics': (context) => const NearbyMechanicsScreen(),
-          '/nearby-requests': (context) => const NearbyRequestsScreen(),
+    return MaterialApp(
+      title: 'Mechanic Discovery',
+      theme: AppTheme.lightTheme, // ← applied light theme here
+      darkTheme: AppTheme.darkTheme,
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/home': (context) {
+          final authProvider = context.read<AuthProvider>();
+          return authProvider.isMechanic
+              ? const MechanicHomeScreen()
+              : const OwnerHomeScreen();
         },
-      ),
+        '/profile': (context) => const ProfileScreen(),
+        '/map': (context) => const MapScreen(),
+        '/update-location': (context) => const UpdateLocationScreen(),
+        '/request-service': (context) => const RequestServiceScreen(),
+        '/nearby-mechanics': (context) => const NearbyMechanicsScreen(),
+        '/nearby-requests': (context) => const NearbyRequestsScreen(),
+        '/service-requests': (context) => const RequestServiceScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/mechanic-profile') {
+          final mechanic = settings.arguments as UserModel;
+          return MaterialPageRoute(
+            builder: (context) => MechanicProfileScreen(mechanic: mechanic),
+          );
+        }
+        return null;
+      },
     );
   }
 }

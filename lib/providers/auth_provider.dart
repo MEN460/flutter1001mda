@@ -5,60 +5,69 @@ import 'package:mechanic_discovery_app/models/user_model.dart';
 import 'package:mechanic_discovery_app/services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
-  late AuthService _authService;
+  // Initialize AuthService via constructor; no 'late' needed
+  final AuthService _authService;
   UserModel? _user;
+  bool _isLoading = false;
 
-  AuthProvider();
+  /// You can inject a custom AuthService (e.g., for testing).
+  AuthProvider({AuthService? authService})
+    : _authService = authService ?? AuthService();
 
-  void updateAuthService(AuthService authService) {
-    _authService = authService;
-  }
+  // Remove updateAuthService; service is ready on creation
 
   UserModel? get user => _user;
   bool get isLoggedIn => _user != null;
   bool get isMechanic => _user?.userType == 'mechanic';
   bool get isCarOwner => _user?.userType == 'car_owner';
   String? get token => _user?.token;
+  bool get isLoading => _isLoading;
 
-  Future<void> register(
+  Future<bool> login(String loginId, String password) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final user = await _authService.login(loginId, password);
+      _user = user;
+      return true;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> register(
     String username,
     String email,
     String password,
     String userType,
     String phone,
   ) async {
+    _isLoading = true;
+    notifyListeners();
     try {
-      _user = await _authService.register(
+      final user = await _authService.register(
         username,
         email,
         password,
         userType,
         phone,
       );
-      notifyListeners();
+      _user = user;
+      return true;
     } catch (e) {
-      print("Register failed: $e");
       rethrow;
-    }
-  }
-
-  Future<bool> login(String loginId, String password) async {
-    try {
-      _user = await _authService.login(loginId, password);
+    } finally {
+      _isLoading = false;
       notifyListeners();
-      return _user != null;
-    } catch (e) {
-      print("Login failed: $e");
-      return false;
     }
   }
 
   Future<void> logout() async {
-    try {
-      await _authService.logout();
-    } finally {
-      _user = null;
-      notifyListeners();
-    }
+    await _authService.logout();
+    _user = null;
+    notifyListeners();
   }
 }

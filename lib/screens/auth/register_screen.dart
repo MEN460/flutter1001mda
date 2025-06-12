@@ -1,8 +1,8 @@
-// ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
+import 'package:mechanic_discovery_app/widgets/auth_screen_header.dart'; // Add this import
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -13,14 +13,22 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _phoneController = TextEditingController();
-
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   String _userType = 'car_owner';
   bool _isLoading = false;
   bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,22 +42,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       body: AbsorbPointer(
         absorbing: _isLoading,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
-            child: ListView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const AuthHeader(
+                  // Use consistent widget name
+                  title: 'Create Account',
+                  subtitle: 'Join us and get started',
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
                     labelText: 'Username',
                     prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Required';
-                    if (value.length < 4) return 'At least 4 characters';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a username';
+                    }
+                    if (value.length < 3) {
+                      return 'Username must be at least 3 characters';
+                    }
                     return null;
                   },
                 ),
@@ -60,13 +79,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Required';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    // Fixed regex pattern
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(value)) {
-                      return 'Enter valid email';
+                      return 'Please enter a valid email';
                     }
                     return null;
                   },
@@ -78,21 +101,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
                             ? Icons.visibility
                             : Icons.visibility_off,
-                        color: Colors.grey,
                       ),
-                      onPressed: () => setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      }),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Required';
-                    if (value.length < 6) return 'At least 6 characters';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
                     return null;
                   },
                 ),
@@ -101,12 +127,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    labelText: 'Phone Number',
+                    labelText: 'Phone',
                     prefixIcon: Icon(Icons.phone),
+                    border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value != null && value.isNotEmpty && value.length < 8) {
-                      return 'Enter valid phone number';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    if (!RegExp(r'^[0-9]{10,15}$').hasMatch(value)) {
+                      return 'Please enter a valid phone number';
                     }
                     return null;
                   },
@@ -124,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text('Mechanic'),
                     ),
                   ],
-                  onChanged: (value) => setState(() => _userType = value!),
+                  onChanged: (val) => setState(() => _userType = val!),
                   decoration: const InputDecoration(
                     labelText: 'Account Type',
                     prefixIcon: Icon(Icons.group),
@@ -180,9 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
-
     try {
       await context.read<AuthProvider>().register(
         _usernameController.text.trim(),
@@ -191,9 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _userType,
         _phoneController.text.trim(),
       );
-
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account created successfully!'),
@@ -201,16 +227,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           duration: Duration(seconds: 2),
         ),
       );
-
       await Future.delayed(const Duration(milliseconds: 1500));
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       if (!mounted) return;
-
-      final cleanMessage = _extractCleanMessage(e.toString());
+      final cleanMsg = _extractCleanMessage(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Registration failed: $cleanMessage'),
+          // Removed const for dynamic content
+          content: Text('Registration failed: $cleanMsg'),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
@@ -223,14 +248,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _extractCleanMessage(String error) {
     const prefix = 'Exception: ';
     return error.startsWith(prefix) ? error.substring(prefix.length) : error;
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _phoneController.dispose();
-    super.dispose();
   }
 }
