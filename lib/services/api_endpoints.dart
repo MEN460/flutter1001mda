@@ -1,23 +1,21 @@
-// lib/services/api_endpoints.dart
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-String baseUrl = dotenv.get('BASE_URL', fallback: 'http://localhost:5000/api');
 
 class ApiEndpoints {
-  static const String baseUrl = 'http://your-backend-domain.com/api';
+  static String baseUrl = dotenv.get(
+    'API_URL',
+    fallback: 'http://localhost:5000',
+  );
 
-  // Auth endpoints
-  static const String register = '$baseUrl/auth/register';
-  static const String login = '$baseUrl/auth/login';
+  static String get apiBase => '$baseUrl/api';
 
-  // Location endpoints
-  static const String updateLocation = '$baseUrl/location/update-location';
-
-  // Mechanics endpoints
-  static const String nearbyMechanics = '$baseUrl/mechanics/nearby-mechanics';
-
-  // Service endpoints
-  static const String requestService = '$baseUrl/service/request-service';
-  static const String acceptRequest = '$baseUrl/service/accept-request';
-  static const String nearbyRequests = '$baseUrl/service/nearby-requests';
+  static String get login => '$apiBase/auth/login';
+  static String get register => '$apiBase/auth/register';
+  static String get userProfile => '$apiBase/user/profile';
+  static String get updateLocation => '$apiBase/update-location';
+  static String get nearbyMechanics => '$apiBase/mechanics/nearby-mechanics';
+  static String get nearbyRequests => '$apiBase/service/nearby-requests';
+  static String get serviceRequest => '$apiBase/service/request-service';
+  static String get acceptRequest => '$apiBase/service/accept-request';
+  static String get health => '$apiBase/health';
+  static String get updateProfile => '$apiBase/user/update-profile';
 }

@@ -1,53 +1,47 @@
-import 'dart:io';
 import 'package:geolocator/geolocator.dart';
+import 'package:mechanic_discovery_app/services/api_endpoints.dart';
 import 'package:mechanic_discovery_app/services/api_service.dart';
 import 'package:mechanic_discovery_app/services/storage_service.dart';
 
 class LocationService {
-  final ApiService _api = ApiService();
-  final StorageService _storage = StorageService();
+  final ApiService _apiService;
+  final StorageService _storageService;
+
+  LocationService({
+    required ApiService apiService,
+    required StorageService storageService,
+  }) : _apiService = apiService,
+       _storageService = storageService;
 
   Future<Position> getCurrentLocation() async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
-      // ⬇️ Desktop fallback
-      return Position(
-        latitude: 37.7749,
-        longitude: -122.4194,
-        timestamp: DateTime.now(),
-        accuracy: 1.0,
-        altitude: 0.0,
-        heading: 0.0,
-        speed: 0.0,
-        speedAccuracy: 0.0, altitudeAccuracy: 1.0, headingAccuracy: 1.0,
-      );
-    }
+    bool serviceEnabled;
+    LocationPermission permission;
 
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Location services are disabled');
+      return Future.error('Location services are disabled.');
     }
 
-    var permission = await Geolocator.checkPermission();
+    permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        throw Exception('Location permissions denied');
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
       }
     }
 
-    return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location permissions are permanently denied');
+    }
+
+    return await Geolocator.getCurrentPosition();
   }
 
   Future<void> updateUserLocation(double latitude, double longitude) async {
-    final token = await _storage.getAccessToken();
-    if (token == null) {
-      throw Exception('[LocationService] No access token available');
-    }
+    final token = await _storageService.getAccessToken();
+    if (token == null) throw Exception('User not authenticated');
 
-    await _api.post('/update-location', {
+    await _apiService.post(ApiEndpoints.updateLocation, {
       'latitude': latitude,
       'longitude': longitude,
     }, token: token);

@@ -1,9 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
+import 'package:mechanic_discovery_app/utils/app_routes.dart';
+import 'package:mechanic_discovery_app/utils/gradient_cache.dart';
+import 'package:provider/provider.dart';
 
 class OwnerHomeScreen extends StatelessWidget {
   const OwnerHomeScreen({Key? key}) : super(key: key);
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final scaffold = ScaffoldMessenger.of(context);
+    final authProvider = context.read<AuthProvider>();
+
+    try {
+      await authProvider.logout();
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    } catch (e) {
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text('Logout failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,14 +36,7 @@ class OwnerHomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthProvider>().logout();
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/login',
-                (route) => false,
-              );
-            },
+            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
@@ -29,175 +45,119 @@ class OwnerHomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
-            _buildHeader(context),
-            const SizedBox(height: 30),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.0,
-                children: [
-                  _buildDashboardCard(
-                    context,
-                    icon: Icons.map,
-                    title: 'Service Map',
-                    onTap: () => Navigator.pushNamed(context, '/map'),
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    icon: Icons.location_on,
-                    title: 'Update Location',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/update-location'),
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    icon: Icons.car_repair,
-                    title: 'Request Service',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/request-service'),
-                  ),
-                  _buildDashboardCard(
-                    context,
-                    icon: Icons.person_search,
-                    title: 'Find Mechanics',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/nearby-mechanics'),
-                  ),
-                ],
+            Text(
+              'Choose an action below to get started:',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            const DashboardCard(
+              icon: Icons.car_repair,
+              title: 'Request Service',
+              description: 'Request a mechanic to assist you with your car.',
+              route: AppRoutes.requestService,
             ),
             const SizedBox(height: 20),
-            _buildRecentActivity(context),
+            const DashboardCard(
+              icon: Icons.location_on,
+              title: 'Update Location',
+              description:
+                  'Set your current location to find nearby mechanics.',
+              route: AppRoutes.updateLocation,
+            ),
+            const SizedBox(height: 20),
+            const DashboardCard(
+              icon: Icons.people,
+              title: 'Nearby Mechanics',
+              description: 'Find mechanics near your current location.',
+              route: AppRoutes.nearbyMechanics,
+            ),
+            const SizedBox(height: 20),
+            const DashboardCard(
+              icon: Icons.person,
+              title: 'My Profile',
+              description: 'View and manage your profile information.',
+              route: '/car-owner-profile',
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
+class DashboardCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final String route;
+
+  const DashboardCard({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.route,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              radius: 30,
-              backgroundImage: AssetImage('assets/user_avatar.png'),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: GradientCache.dashboardCardGradient,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          onTap: () => Navigator.pushNamed(context, route),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
               children: [
-                Text(
-                  'Welcome back!',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 28,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Car Owner',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
                 ),
+                const Icon(Icons.chevron_right, size: 30),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDashboardCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 32,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildRecentActivity(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Recent Activity',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildActivityItem('Engine Check', 'Yesterday', Icons.car_repair),
-            const Divider(),
-            _buildActivityItem('Tire Replacement', '2 days ago', Icons.build),
-            const Divider(),
-            _buildActivityItem(
-              'Oil Change',
-              '1 week ago',
-              Icons.local_car_wash,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActivityItem(String service, String time, IconData icon) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.blue[50],
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.blue),
-      ),
-      title: Text(service),
-      subtitle: Text(time),
-      trailing: const Icon(Icons.chevron_right),
     );
   }
 }

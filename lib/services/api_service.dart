@@ -1,38 +1,62 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
-  static final String? _baseUrl = dotenv.env['API_URL'];
+  Future<dynamic> post(String url, dynamic body, {String? token}) async {
+    print('[API] POST to $url');
+    print('[API] Request body: $body');
 
-  Future<dynamic> post(String endpoint, dynamic body, {String? token}) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(body),
-    );
-    return _handleResponse(response);
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      print('[API] Response status: ${response.statusCode}');
+      print('[API] Response body: ${response.body}');
+
+      return _handleResponse(response);
+    } catch (e) {
+      print('[API] Error: $e');
+      rethrow;
+    }
   }
 
-  Future<dynamic> get(String endpoint, {String? token}) async {
-    final response = await http.get(
-      Uri.parse('$_baseUrl$endpoint'),
-      headers: {if (token != null) 'Authorization': 'Bearer $token'},
-    );
-    return _handleResponse(response);
+  Future<dynamic> get(String url, {String? token}) async {
+    print('[API] GET to $url');
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {if (token != null) 'Authorization': 'Bearer $token'},
+      );
+
+      print('[API] Response status: ${response.statusCode}');
+      print('[API] Response body: ${response.body}');
+
+      return _handleResponse(response);
+    } catch (e) {
+      print('[API] Error: $e');
+      rethrow;
+    }
   }
 
   dynamic _handleResponse(http.Response response) {
-    final decoded = jsonDecode(response.body);
-
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return decoded;
+      return jsonDecode(response.body);
     } else {
-      final message = decoded['message'] ?? decoded['error'] ?? 'Unknown error';
-      throw Exception('Error ${response.statusCode}: $message');
+      try {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'API Error ${response.statusCode}');
+      } catch (_) {
+        throw Exception('API Error ${response.statusCode}: ${response.body}');
+      }
     }
   }
 }

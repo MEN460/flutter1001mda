@@ -2,21 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/models/service_request_model.dart';
 import 'package:mechanic_discovery_app/providers/service_provider.dart';
-import 'package:mechanic_discovery_app/widgets/service_request_card.dart';
-
+import 'package:mechanic_discovery_app/providers/auth_provider.dart';
+import 'package:mechanic_discovery_app/widgets/cards/service_request_card.dart';
 
 class NearbyRequestsScreen extends StatelessWidget {
   const NearbyRequestsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isMechanic) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Access Denied')),
+        body: const Center(
+          child: Text('Only mechanics can access this feature'),
         ),
-        title: const Text('Nearby Requests')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Nearby Requests')),
       body: FutureBuilder<List<ServiceRequest>>(
         future: context.read<ServiceProvider>().getNearbyRequests(),
         builder: (context, snapshot) {

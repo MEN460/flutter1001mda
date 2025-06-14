@@ -1,71 +1,68 @@
-// ignore_for_file: unused_field, avoid_print
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mechanic_discovery_app/models/service_request_model.dart';
+import 'package:mechanic_discovery_app/models/user_model.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
 import 'package:mechanic_discovery_app/services/api_service.dart';
 import 'package:mechanic_discovery_app/services/storage_service.dart';
-
+import 'package:mechanic_discovery_app/services/api_endpoints.dart';
 
 class ServiceProvider with ChangeNotifier {
-  
-  late AuthProvider _auth;
-  late ApiService _apiService;
-  late StorageService _storageService;
-
+  final AuthProvider _auth;
+  final ApiService _apiService;
+  final StorageService _storageService;
   List<ServiceRequest> _requests = [];
 
   List<ServiceRequest> get requests => _requests;
 
-  void updateDependencies(
-    AuthProvider auth,
-    ApiService api,
-    StorageService storage,
-  ) {
-    _auth = auth;
-    _apiService = api;
-    _storageService = storage;
-  }
+  ServiceProvider({
+    required AuthProvider auth,
+    required ApiService apiService,
+    required StorageService storageService,
+  }) : _auth = auth,
+       _apiService = apiService,
+       _storageService = storageService;
 
   Future<List<ServiceRequest>> getNearbyRequests() async {
-    final token = await _storageService.getAccessToken();
-    final response = await _apiService.get(
-      '/service/nearby-requests',
-      token: token,
-    );
+    try {
+      final token = await _storageService.getAccessToken();
+      final response = await _apiService.get(
+        ApiEndpoints.nearbyRequests,
+        token: token,
+      );
 
-    _requests = (response as List)
-        .map((item) => ServiceRequest.fromJson(item))
-        .toList();
-
-    notifyListeners();
-    return _requests;
+      if (response is! List) throw const FormatException('Expected List');
+      _requests = response
+          .map((item) => ServiceRequest.fromJson(item))
+          .toList();
+      notifyListeners();
+      return _requests;
+    } catch (e) {
+      debugPrint('Error loading requests: $e');
+      rethrow;
+    }
   }
 
   Future<void> acceptRequest(int requestId) async {
-    final token = await _storageService.getAccessToken();
-    await _apiService.post('/service/accept-request', {
-      'request_id': requestId,
-    }, token: token);
+    try {
+      final token = await _storageService.getAccessToken();
+      await _apiService.post(ApiEndpoints.acceptRequest, {
+        'request_id': requestId,
+      }, token: token);
 
-    // Update the local list
-    _requests = _requests.map((request) {
-      if (request.id == requestId) {
-        return ServiceRequest(
-          id: request.id,
-          carOwnerId: request.carOwnerId,
-          mechanicId: request.mechanicId,
-          latitude: request.latitude,
-          longitude: request.longitude,
-          description: request.description,
+      final index = _requests.indexWhere((r) => r.id == requestId);
+      if (index != -1) {
+        _requests[index] = _requests[index].copyWith(
           status: 'accepted',
           acceptedAt: DateTime.now(),
+          mechanicId: _auth.user?.id,
         );
+        notifyListeners();
       }
-      return request;
-    }).toList();
-
-    notifyListeners();
+    } catch (e) {
+      debugPrint('Error accepting request: $e');
+      rethrow;
+    }
   }
 
   Future<void> requestService(
@@ -73,17 +70,35 @@ class ServiceProvider with ChangeNotifier {
     double longitude,
     String description,
   ) async {
-    final token = await _storageService.getAccessToken();
+    try {
+      final token = await _storageService.getAccessToken();
+      await _apiService.post(ApiEndpoints.serviceRequest, {
+        'latitude': latitude,
+        'longitude': longitude,
+        'description': description,
+      }, token: token);
+    } catch (e) {
+      debugPrint('Error requesting service: $e');
+      rethrow;
+    }
+  }
 
-    // 🔍 DEBUG: Log token and input data
-    print('[RequestService] token: $token');
-    print('[RequestService] latitude: $latitude, longitude: $longitude');
-    print('[RequestService] description: $description');
+  Future<List<UserModel>> getNearbyMechanics(
+    double latitude,
+    double longitude,
+  ) async {
+    try {
+      final token = await _storageService.getAccessToken();
+      final response = await _apiService.get(
+        '${ApiEndpoints.nearbyMechanics}?latitude=$latitude&longitude=$longitude',
+        token: token,
+      );
 
-    await _apiService.post('/service/request-service', {
-      'latitude': latitude,
-      'longitude': longitude,
-      'description': description,
-    }, token: token);
+      if (response is! List) throw const FormatException('Expected List');
+      return response.map((item) => UserModel.fromJson(item)).toList();
+    } catch (e) {
+      debugPrint('Error loading mechanics: $e');
+      rethrow;
+    }
   }
 }
