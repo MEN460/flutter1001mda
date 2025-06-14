@@ -15,6 +15,16 @@ import 'package:mechanic_discovery_app/theme/app_theme.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+<<<<<<< HEAD
+=======
+import '../models/service_request_model.dart';
+import '../providers/auth_provider.dart';
+import '../providers/location_provider.dart';
+import '../services/api_endpoints.dart';
+import '../widgets/shimmer_loading_overlay.dart'; // Add shimmer import
+import '../theme/app_theme.dart';
+
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
 
@@ -22,9 +32,13 @@ class MapScreen extends StatefulWidget {
   _MapScreenState createState() => _MapScreenState();
 }
 
+<<<<<<< HEAD
 class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   List<UserModel> _nearbyMechanics = [];
   bool _showMechanics = false;
+=======
+class _MapScreenState extends State<MapScreen> {
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
   late MapController _mapController;
   final List<Marker> _markers = [];
   ServiceRequest? _selectedRequest;
@@ -32,16 +46,25 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool _isLoading = true;
   bool _showRequestsList = false;
   List<ServiceRequest> _nearbyRequests = [];
+<<<<<<< HEAD
   late AnimationController _listAnimationController;
   late Animation<double> _listOpacityAnimation;
   late Animation<Offset> _listSlideAnimation;
   final PopupController _popupController = PopupController();
+=======
+
+  bool get isMechanic => context.watch<AuthProvider>().isMechanic;
+  ThemeData get theme => Theme.of(context);
+  AppCustomTheme get customTheme =>
+      Theme.of(context).extension<AppCustomTheme>()!;
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
     _getCurrentLocation();
+<<<<<<< HEAD
     _loadInitialData();
 
     // Initialize animations with default duration
@@ -113,6 +136,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
   }
 
   Future<void> _getCurrentLocation() async {
@@ -138,6 +163,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     if (!mounted) return;
     setState(() => _isLoading = true);
     try {
+<<<<<<< HEAD
       final serviceProvider = context.read<ServiceProvider>();
       _nearbyRequests = await serviceProvider.getNearbyRequests();
       _updateMarkers();
@@ -145,6 +171,35 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
+=======
+      final authProvider = context.read<AuthProvider>();
+      final token = authProvider.token;
+
+      final response = await http.get(
+        Uri.parse(
+          '${ApiEndpoints.baseUrl}/api/service/nearby-requests?latitude=$lat&longitude=$lng&radius=10',
+        ),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (!mounted) return;
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(response.body);
+        setState(() {
+          _nearbyRequests = responseData
+              .map((data) => ServiceRequest.fromJson(data))
+              .toList();
+          _updateMarkers();
+        });
+      } else {
+        throw Exception('Failed to load nearby requests');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: \\${e.toString()}')));
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     } finally {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -152,11 +207,16 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   void _updateMarkers() {
+<<<<<<< HEAD
     if (!mounted) return;
 
     _markers.clear();
 
     // Current user marker
+=======
+    _markers.clear();
+
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     if (_currentPosition != null) {
       _markers.add(
         Marker(
@@ -164,28 +224,42 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             _currentPosition!.latitude,
             _currentPosition!.longitude,
           ),
+<<<<<<< HEAD
           width: 40,
           height: 40,
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
           builder: (ctx) => _buildUserMarker(),
         ),
       );
     }
 
+<<<<<<< HEAD
     // Mechanic view: service requests
     if (context.read<AuthProvider>().isMechanic) {
+=======
+    if (isMechanic) {
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
       for (final request in _nearbyRequests) {
         _markers.add(
           Marker(
             point: latlng.LatLng(request.latitude, request.longitude),
+<<<<<<< HEAD
             width: 40,
             height: 40,
             builder: (ctx) => GestureDetector(
               onTap: () => _onMarkerTapped(request),
               child: _buildRequestMarker(request),
+=======
+            builder: (ctx) => GestureDetector(
+              onTap: () => _onMarkerTapped(request),
+              child: _buildRequestMarker(),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
             ),
           ),
         );
       }
+<<<<<<< HEAD
     }
     // Car owner view: mechanics
     else if (_showMechanics) {
@@ -209,10 +283,23 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           ),
         );
       }
+=======
+    } else if (_currentPosition != null) {
+      _markers.add(
+        Marker(
+          point: latlng.LatLng(
+            _currentPosition!.latitude + 0.01,
+            _currentPosition!.longitude + 0.01,
+          ),
+          builder: (ctx) => _buildDummyMarker(),
+        ),
+      );
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     }
   }
 
   Widget _buildUserMarker() {
+<<<<<<< HEAD
     final theme = Theme.of(context);
     final customTheme = theme.extension<AppCustomTheme>();
     final isMechanic = context.read<AuthProvider>().isMechanic;
@@ -241,11 +328,25 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         color: isMechanic
             ? customTheme?.mechanicColor ?? Colors.blue
             : customTheme?.nonMechanicColor ?? Colors.green,
+=======
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [customTheme.markerShadow],
+      ),
+      child: Icon(
+        Icons.location_pin,
+        color: isMechanic
+            ? customTheme.mechanicColor
+            : customTheme.nonMechanicColor,
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
         size: 30,
       ),
     );
   }
 
+<<<<<<< HEAD
   Widget _buildRequestMarker(ServiceRequest request) {
     final theme = Theme.of(context);
     final customTheme = theme.extension<AppCustomTheme>();
@@ -387,6 +488,34 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         _showRequestsList = false;
         _listAnimationController.reverse();
       }
+=======
+  Widget _buildRequestMarker() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [customTheme.markerShadow],
+      ),
+      child: const Icon(Icons.location_pin, color: Colors.red, size: 30),
+    );
+  }
+
+  Widget _buildDummyMarker() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [customTheme.markerShadow],
+      ),
+      child: const Icon(Icons.person_pin, color: Colors.orange, size: 30),
+    );
+  }
+
+  void _onMarkerTapped(ServiceRequest request) {
+    setState(() {
+      _selectedRequest = request;
+      _showRequestsList = false;
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     });
 
     _mapController.move(
@@ -397,6 +526,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   Future<void> _acceptRequest(int requestId) async {
     setState(() => _isLoading = true);
+<<<<<<< HEAD
     try {
       await context.read<ServiceProvider>().acceptRequest(requestId);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -413,6 +543,43 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
+=======
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final token = authProvider.token;
+
+      final response = await http.post(
+        Uri.parse('${ApiEndpoints.baseUrl}/api/service/accept-request'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({'request_id': requestId}),
+      );
+
+      if (!mounted) return;
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Request accepted successfully!')),
+        );
+
+        setState(() {
+          _nearbyRequests.removeWhere((req) => req.id == requestId);
+          _selectedRequest = null;
+          _updateMarkers();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to accept request: \\${response.body}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: \\${e.toString()}')));
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     }
   }
 
@@ -426,7 +593,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildMechanicFAB() {
+<<<<<<< HEAD
     final theme = Theme.of(context);
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     return FloatingActionButton(
       heroTag: 'location',
       backgroundColor: theme.colorScheme.primary,
@@ -436,7 +606,10 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildOwnerFAB() {
+<<<<<<< HEAD
     final theme = Theme.of(context);
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     return FloatingActionButton.extended(
       heroTag: 'request_service',
       backgroundColor: theme.colorScheme.primary,
@@ -450,9 +623,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildTopControls() {
+<<<<<<< HEAD
     final theme = Theme.of(context);
     final isMechanic = context.read<AuthProvider>().isMechanic;
 
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -482,7 +658,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
+<<<<<<< HEAD
                       color: Colors.black.withAlpha((0.2 * 255).toInt()),
+=======
+                      color: Colors.black.withOpacity(0.1),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
                       blurRadius: 10,
                       spreadRadius: 1,
                     ),
@@ -506,6 +686,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(width: 10),
+<<<<<<< HEAD
             if (isMechanic) ...[
               FloatingActionButton(
                 heroTag: 'list',
@@ -547,6 +728,22 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 child: const Icon(Icons.list, color: Colors.black),
               ),
             ],
+=======
+            FloatingActionButton(
+              heroTag: 'list',
+              mini: true,
+              backgroundColor: Colors.white,
+              onPressed: isMechanic
+                  ? () => setState(() => _showRequestsList = !_showRequestsList)
+                  : () => Navigator.pushNamed(context, '/nearby-mechanics'),
+              child: Icon(
+                isMechanic
+                    ? (_showRequestsList ? Icons.map : Icons.list)
+                    : Icons.list,
+                color: Colors.black,
+              ),
+            ),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
           ],
         ),
       ),
@@ -554,8 +751,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildRequestsList() {
+<<<<<<< HEAD
     if (!context.read<AuthProvider>().isMechanic)
       return const SizedBox.shrink();
+=======
+    if (!isMechanic) return const SizedBox.shrink();
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 
     return Container(
       decoration: BoxDecoration(
@@ -563,7 +764,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
+<<<<<<< HEAD
             color: Colors.black.withAlpha((0.2 * 255).toInt()),
+=======
+            color: Colors.black.withOpacity(0.2),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
             blurRadius: 10,
             spreadRadius: 2,
           ),
@@ -580,9 +785,15 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                   'Nearby Requests',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+<<<<<<< HEAD
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: _toggleRequestsList,
+=======
+                Text(
+                  '${_nearbyRequests.length} found',
+                  style: const TextStyle(color: Colors.grey),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
                 ),
               ],
             ),
@@ -595,9 +806,15 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     itemBuilder: (context, index) {
                       final request = _nearbyRequests[index];
                       return ListTile(
+<<<<<<< HEAD
                         leading: Icon(
                           Icons.car_repair,
                           color: _getStatusColor(request.status),
+=======
+                        leading: const Icon(
+                          Icons.car_repair,
+                          color: Colors.red,
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
                         ),
                         title: Text(
                           'Request #${request.id}',
@@ -636,13 +853,17 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     )
                   : latlng.LatLng(-1.2921, 36.8219),
               zoom: 14.0,
+<<<<<<< HEAD
               onTap: (_, __) => _popupController.hideAllPopups(),
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
             ),
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.app',
               ),
+<<<<<<< HEAD
               MarkerClusterLayerWidget(
                 options: MarkerClusterLayerOptions(
                   maxClusterRadius: 120,
@@ -668,6 +889,22 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           ),
           if (_isLoading) const ShimmerLoadingOverlay(),
           Positioned(top: 0, left: 0, right: 0, child: _buildTopControls()),
+=======
+              MarkerLayer(markers: _markers),
+            ],
+          ),
+
+          // Shimmer loading overlay
+          if (_isLoading) const ShimmerLoadingOverlay(),
+
+          Positioned(
+            top: MediaQuery.of(context).padding.top,
+            left: 0,
+            right: 0,
+            child: _buildTopControls(),
+          ),
+
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
           if (_selectedRequest != null)
             Positioned(
               bottom: 0,
@@ -679,6 +916,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 onClose: () => setState(() => _selectedRequest = null),
               ),
             ),
+<<<<<<< HEAD
           if (_showRequestsList || _listAnimationController.isAnimating)
             Positioned(
               top: MediaQuery.of(context).padding.top + 80,
@@ -699,6 +937,27 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       floatingActionButton: context.watch<AuthProvider>().isMechanic
           ? _buildMechanicFAB()
           : _buildOwnerFAB(),
+=======
+
+          // Animated requests list
+          AnimatedSwitcher(
+            duration: customTheme.animationDuration,
+            child: _showRequestsList
+                ? Positioned(
+                    key: const ValueKey('requests_list'),
+                    top: MediaQuery.of(context).padding.top + 80,
+                    left: 16,
+                    right: 16,
+                    bottom: _selectedRequest != null ? 180 : 16,
+                    child: _buildRequestsList(),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: isMechanic ? _buildMechanicFAB() : _buildOwnerFAB(),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     );
   }
 }

@@ -80,9 +80,15 @@ class LocationProvider with ChangeNotifier {
       final position = await _locationService.getCurrentLocation();
       _currentPosition = position;
       notifyListeners();
+<<<<<<< HEAD
           return position;
     } catch (e) {
       print('[LocationProvider] Error: $e');
+=======
+      return position;
+    } catch (e) {
+      print('[LocationProvider] Error retrieving location: $e');
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
       return null;
     }
   }

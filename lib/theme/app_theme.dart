@@ -3,11 +3,19 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+<<<<<<< HEAD
     primaryColor: const Color(0xFF1A237E),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFF1A237E),
       secondary: Color(0xFF00BFA5),
       surface: Color(0xFFFFFFFF),
+=======
+    primaryColor: const Color(0xFF1A237E), // Deep blue for better contrast
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFF1A237E),
+      secondary: Color(0xFF00BFA5),
+      surface: Color(0xFFFFFFFF), // Lighter background
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
       onPrimary: Color(0xFFFFFFFF),
       onSecondary: Color(0xFF00332C),
       onSurface: Color(0xFF212121),
@@ -18,7 +26,11 @@ class AppTheme {
       displayLarge: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w800,
+<<<<<<< HEAD
         color: Color(0xFF1A237E),
+=======
+        color: Color(0xFF1A237E), // Deep blue
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
       ),
       titleLarge: TextStyle(
         fontSize: 22,
@@ -245,6 +257,10 @@ class AppCustomTheme extends ThemeExtension<AppCustomTheme> {
     );
   }
 
+<<<<<<< HEAD
+=======
+  // Static helper method for Duration interpolation
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
   static Duration _lerpDuration(Duration a, Duration b, double t) {
     return Duration(
       milliseconds:

@@ -1,7 +1,61 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
 import 'package:mechanic_discovery_app/widgets/auth_screen_header.dart';
+
+// Common header with visual hierarchy and social logins
+typedef AuthScreenHeader =
+    StatelessWidget Function(
+      BuildContext context,
+      String title,
+      String subtitle,
+    );
+
+class _AuthScreenHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _AuthScreenHeader({
+    required this.title,
+    required this.subtitle,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        Text(title, style: Theme.of(context).textTheme.displayLarge),
+        const SizedBox(height: 10),
+        Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
+        const SizedBox(height: 40),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () {
+                // TODO: implement Google login
+              },
+              icon: Image.asset('assets/google.png', width: 40),
+            ),
+            const SizedBox(width: 16),
+            IconButton(
+              onPressed: () {
+                // TODO: implement Facebook login
+              },
+              icon: Image.asset('assets/facebook.png', width: 40),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -26,6 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: AbsorbPointer(
@@ -37,8 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+<<<<<<< HEAD
                 const SizedBox(height: 40),
                 const AuthScreenHeader(
+=======
+                const _AuthScreenHeader(
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
                   title: 'Welcome Back',
                   subtitle: 'Sign in to continue',
                 ),
@@ -123,15 +183,23 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
+<<<<<<< HEAD
       await context.read<AuthProvider>().login(
         _loginIdController.text.trim(),
         _passwordController.text.trim(),
       );
       Navigator.pushReplacementNamed(context, '/home');
+=======
+      final success = await context.read<AuthProvider>().login(
+        _loginIdController.text.trim(),
+        _passwordController.text.trim(),
+      );
+      if (success) Navigator.pushReplacementNamed(context, '/home');
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+      ).showSnackBar(const SnackBar(content: Text('Login failed: \$e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

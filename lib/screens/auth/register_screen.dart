@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
 import 'package:mechanic_discovery_app/widgets/auth_screen_header.dart';
+=======
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mechanic_discovery_app/providers/auth_provider.dart';
+import 'package:mechanic_discovery_app/widgets/auth_screen_header.dart'; // Add this import
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -42,10 +50,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+<<<<<<< HEAD
                 const AuthScreenHeader(
                   title: 'Create Account',
                   subtitle: 'Fill in your details to get started',
                 ),
+=======
+                const AuthHeader(
+                  // Use consistent widget name
+                  title: 'Create Account',
+                  subtitle: 'Join us and get started',
+                ),
+                const SizedBox(height: 16),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
@@ -76,6 +93,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
+<<<<<<< HEAD
+=======
+                    // Fixed regex pattern
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(value)) {
@@ -221,11 +242,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       if (!mounted) return;
+<<<<<<< HEAD
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Registration failed: ${_extractCleanMessage(e.toString())}',
           ),
+=======
+      final cleanMsg = _extractCleanMessage(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          // Removed const for dynamic content
+          content: Text('Registration failed: $cleanMsg'),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),

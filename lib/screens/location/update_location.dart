@@ -20,10 +20,15 @@ class _UpdateLocationScreenState extends State<UpdateLocationScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+<<<<<<< HEAD
     final locationProvider = context.watch<LocationProvider>();
 
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
+<<<<<<< HEAD
         title: Text(
           'Update Location',
           style: textTheme.titleLarge?.copyWith(color: colorScheme.primary),
@@ -66,6 +71,49 @@ class _UpdateLocationScreenState extends State<UpdateLocationScreen> {
           if (locationProvider.isProcessing)
             const LinearProgressIndicator(minHeight: 2),
         ],
+=======
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Update Location',
+          style: textTheme.titleLarge?.copyWith(color: colorScheme.primary),
+        ),
+        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        iconTheme: theme.appBarTheme.iconTheme,
+      ),
+      body: Center(
+        child: Card(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: _isLoading
+                ? CircularProgressIndicator(color: colorScheme.primary)
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      textStyle: textTheme.labelLarge,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _updateLocation,
+                    child: const Text('Get Current Location'),
+                  ),
+          ),
+        ),
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
       ),
     );
   }

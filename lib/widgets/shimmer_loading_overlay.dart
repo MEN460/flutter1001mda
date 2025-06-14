@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+// lib/widgets/shimmer_loading_overlay.dart
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 

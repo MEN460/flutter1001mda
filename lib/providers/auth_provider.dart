@@ -3,16 +3,29 @@ import 'package:mechanic_discovery_app/models/user_model.dart';
 import 'package:mechanic_discovery_app/services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
+<<<<<<< HEAD
+=======
+  // Initialize AuthService via constructor; no 'late' needed
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
   final AuthService _authService;
   UserModel? _user;
   bool _isLoading = false;
 
+<<<<<<< HEAD
   AuthProvider({required AuthService authService}) : _authService = authService;
+=======
+  /// You can inject a custom AuthService (e.g., for testing).
+  AuthProvider({AuthService? authService})
+    : _authService = authService ?? AuthService();
+
+  // Remove updateAuthService; service is ready on creation
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 
   UserModel? get user => _user;
   bool get isLoggedIn => _user != null;
   bool get isMechanic => _user?.userType == 'mechanic';
   bool get isCarOwner => _user?.userType == 'car_owner';
+<<<<<<< HEAD
   bool get isLoading => _isLoading;
   int? get currentUserId => _user?.id;
 
@@ -28,8 +41,27 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+=======
+  String? get token => _user?.token;
+  bool get isLoading => _isLoading;
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 
-  Future<void> register(
+  Future<bool> login(String loginId, String password) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final user = await _authService.login(loginId, password);
+      _user = user;
+      return true;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> register(
     String username,
     String email,
     String password,
@@ -39,13 +71,18 @@ class AuthProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _user = await _authService.register(
+      final user = await _authService.register(
         username,
         email,
         password,
         userType,
         phone,
       );
+<<<<<<< HEAD
+=======
+      _user = user;
+      return true;
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     } catch (e) {
       rethrow;
     } finally {
@@ -58,6 +95,7 @@ class AuthProvider with ChangeNotifier {
     await _authService.logout();
     _user = null;
     notifyListeners();
+<<<<<<< HEAD
   }
 
 
@@ -69,6 +107,8 @@ class AuthProvider with ChangeNotifier {
       );
       notifyListeners(); // Add missing notify
     }
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
   }
 
   Future<void> updateProfile(String specialization, String phone) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:provider/provider.dart';
 import 'package:mechanic_discovery_app/providers/auth_provider.dart';
 import 'package:mechanic_discovery_app/providers/location_provider.dart';
@@ -6,11 +7,17 @@ import 'package:mechanic_discovery_app/widgets/rating_bar.dart';
 import 'package:mechanic_discovery_app/models/user_model.dart';
 
 class MechanicProfileScreen extends StatefulWidget {
+=======
+import 'package:mechanic_discovery_app/models/user_model.dart';
+
+class MechanicProfileScreen extends StatelessWidget {
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
   final UserModel mechanic;
   const MechanicProfileScreen({Key? key, required this.mechanic})
     : super(key: key);
 
   @override
+<<<<<<< HEAD
   State<MechanicProfileScreen> createState() => _MechanicProfileScreenState();
 }
 
@@ -132,11 +139,32 @@ class _MechanicProfileScreenState extends State<MechanicProfileScreen> {
                 ),
               ),
             ],
+=======
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(mechanic.username)),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Mechanic Profile',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 16),
+            Text('Name: ${mechanic.username}'),
+            Text('Email: ${mechanic.email}'),
+            Text('Specialization: ${mechanic.specialization ?? 'N/A'}'),
+            Text('Rating: ${mechanic.rating?.toStringAsFixed(1) ?? 'N/A'}'),
+            // Add more fields as needed
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
           ],
         ),
       ),
     );
   }
+<<<<<<< HEAD
 
   Widget _buildProfileSection(
     BuildContext context,
@@ -254,4 +282,6 @@ class _MechanicProfileScreenState extends State<MechanicProfileScreen> {
       ),
     );
   }
+=======
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
 }

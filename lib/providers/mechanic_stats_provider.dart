@@ -11,9 +11,15 @@ class MechanicStatsProvider with ChangeNotifier {
 
   Future<void> loadStats() async {
     // Implementation to load stats from backend
+<<<<<<< HEAD
     _pending = 12;
     _completed = 24;
     _rating = 4.8;
+=======
+    _pending = 12; // Example data
+    _completed = 24; // Example data
+    _rating = 4.8; // Example data
+>>>>>>> d02c06fd42dd76ac6c2a6de1e056817b72f0a301
     notifyListeners();
   }
 }
